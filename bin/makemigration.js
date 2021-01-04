@@ -73,7 +73,7 @@ const queryInterface = require(modelsDir).sequelize.getQueryInterface();
 const { models } = sequelize;
 
 // This is the table that sequelize uses
-queryInterface.createTable('SequelizeMeta', {
+queryInterface.createTable('sequelize_meta', {
   name: {
     type: Sequelize.STRING,
     allowNull: false,
@@ -81,7 +81,7 @@ queryInterface.createTable('SequelizeMeta', {
     primaryKey: true,
   },
 }).then(() => {
-  queryInterface.createTable('SequelizeMetaMigrations', {
+  queryInterface.createTable('sequelize_meta_migrations', {
     revision: {
       type: Sequelize.INTEGER,
       allowNull: false,
@@ -98,9 +98,9 @@ queryInterface.createTable('SequelizeMeta', {
     },
   }).then(() => {
   // We get the state at the last migration executed
-    sequelize.query('SELECT name FROM `SequelizeMeta` ORDER BY `name` desc limit 1', { type: sequelize.QueryTypes.SELECT })
+    sequelize.query('SELECT name FROM sequelize_meta ORDER BY name desc limit 1', { type: sequelize.QueryTypes.SELECT })
       .then(([lastExecutedMigration]) => {
-        sequelize.query(`SELECT state FROM \`SequelizeMetaMigrations\` where \`revision\` = '${lastExecutedMigration === undefined ? -1 : lastExecutedMigration.name.split('-')[0]}'`, { type: sequelize.QueryTypes.SELECT })
+        sequelize.query(`SELECT state FROM sequelize_meta_migrations where revision = '${lastExecutedMigration === undefined ? -1 : lastExecutedMigration.name.split('-')[0]}'`, { type: sequelize.QueryTypes.SELECT })
           .then(([lastMigration]) => {
             if (lastMigration !== undefined) previousState = lastMigration.state;
 
@@ -158,9 +158,9 @@ queryInterface.createTable('SequelizeMeta', {
                 state: JSON.stringify(currentState),
               }];
 
-              queryInterface.bulkDelete('SequelizeMetaMigrations', { revision: currentState.revision })
+              queryInterface.bulkDelete('sequelize_meta_migrations', { revision: currentState.revision })
                 .then(() => {
-                  queryInterface.bulkInsert('SequelizeMetaMigrations', rows)
+                  queryInterface.bulkInsert('sequelize_meta_migrations', rows)
                     .then(() => {
                       if (options.verbose) console.log('Updated state on DB.');
                       if (options.execute) {
